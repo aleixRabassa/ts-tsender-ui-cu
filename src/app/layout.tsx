@@ -1,20 +1,19 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ReactNode } from "react";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: "TSender",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout(props: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
-        {children}
+        <Providers>
+          {props.children}
+        </Providers>
       </body>
     </html>
   );
