@@ -1,10 +1,12 @@
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import Header from "@/components/header";
 
 export default function Home() {
   return (
     <div>
-      <ConnectButton/>
-      Hi!
+      <Header />
+      <main className="p-6">
+        Hi!
+      </main>
     </div>
   );
 }
