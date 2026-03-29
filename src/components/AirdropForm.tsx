@@ -4,16 +4,16 @@ import InputField from "@/components/ui/InputField"
 import TxDetails from "@/components/ui/TxDetails"
 import TxResultModal from "@/components/ui/TxResultModal"
 import SendButton from "@/components/ui/SendButton"
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { chainsToTSender, erc20Abi, tsenderAbi } from "@/constants"
 import { useChainId, useConfig, useAccount, useWriteContract, useReadContracts } from "wagmi"
 import { readContract, waitForTransactionReceipt } from "@wagmi/core"
 import { calculateTotal } from "@/utils"
 
 export default function AirdropForm() {
-    const [tokenAddress, setTokenAddress] = useState("")
-    const [recipients, setRecipients] = useState("")
-    const [amounts, setAmounts] = useState("")
+    const [tokenAddress, setTokenAddressState] = useState("")
+    const [recipients, setRecipientsState] = useState("")
+    const [amounts, setAmountsState] = useState("")
     const [isLoading, setIsLoading] = useState(false)
     const [txResult, setTxResult] = useState<{ success: boolean; error?: string } | null>(null)
     const chainId = useChainId()
@@ -21,9 +21,7 @@ export default function AirdropForm() {
     const account = useAccount()
     const total: number = useMemo(() => calculateTotal(amounts), [amounts])
     const { data: hash, isPending, writeContractAsync } = useWriteContract()
-
     const isValidAddress = /^0x[0-9a-fA-F]{40}$/.test(tokenAddress.trim())
-
     const { data: tokenData } = useReadContracts({
         contracts: [
             {
@@ -39,14 +37,31 @@ export default function AirdropForm() {
         ],
         query: { enabled: isValidAddress },
     })
-
     const tokenName = tokenData?.[0]?.result
     const tokenDecimals = tokenData?.[1]?.result
-
     const amountInTokens = useMemo(() => {
         if (!total || !tokenDecimals) return null
         return (total / Math.pow(10, Number(tokenDecimals))).toString()
     }, [total, tokenDecimals])
+
+    useEffect(() => {
+        setTokenAddressState(localStorage.getItem("airdrop_tokenAddress") ?? "")
+        setRecipientsState(localStorage.getItem("airdrop_recipients") ?? "")
+        setAmountsState(localStorage.getItem("airdrop_amounts") ?? "")
+    }, [])
+
+    function setTokenAddress(value: string) {
+        setTokenAddressState(value)
+        localStorage.setItem("airdrop_tokenAddress", value)
+    }
+    function setRecipients(value: string) {
+        setRecipientsState(value)
+        localStorage.setItem("airdrop_recipients", value)
+    }
+    function setAmounts(value: string) {
+        setAmountsState(value)
+        localStorage.setItem("airdrop_amounts", value)
+    }
 
     async function getApprovedAmount(tSenderAddress: string | null): Promise<number> {
 
