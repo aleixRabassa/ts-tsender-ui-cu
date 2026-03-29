@@ -1,7 +1,9 @@
 "use client"
 
-import InputField from "@/components/ui/inputField"
-import TransactionDetails from "@/components/ui/transactionDetails"
+import InputField from "@/components/ui/InputField"
+import TxDetails from "@/components/ui/TxDetails"
+import TxResultModal from "@/components/ui/TxResultModal"
+import SendButton from "@/components/ui/SendButton"
 import { useMemo, useState } from "react"
 import { chainsToTSender, erc20Abi, tsenderAbi } from "@/constants"
 import { useChainId, useConfig, useAccount, useWriteContract, useReadContracts } from "wagmi"
@@ -13,6 +15,7 @@ export default function AirdropForm() {
     const [recipients, setRecipients] = useState("")
     const [amounts, setAmounts] = useState("")
     const [isLoading, setIsLoading] = useState(false)
+    const [txResult, setTxResult] = useState<{ success: boolean; error?: string } | null>(null)
     const chainId = useChainId()
     const config = useConfig()
     const account = useAccount()
@@ -71,6 +74,7 @@ export default function AirdropForm() {
 
     async function handleSendTokens() {
         setIsLoading(true)
+        setTxResult(null)
         try {
             const tSenderAddress = chainsToTSender[chainId]["tsender"]
             const approvedAmount = await getApprovedAmount(tSenderAddress)
@@ -112,6 +116,10 @@ export default function AirdropForm() {
             })
 
             console.log("[handleSendTokens] Airdrop transaction sent, hash:", hash)
+            setTxResult({ success: true })
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error)
+            setTxResult({ success: false, error: message })
         } finally {
             setIsLoading(false)
         }
@@ -139,22 +147,19 @@ export default function AirdropForm() {
                 onChange={e => setAmounts(e.target.value)} 
                 multiline
             />
-            <TransactionDetails
+            <TxDetails
                 tokenName={tokenName ? String(tokenName) : undefined}
                 total={total}
                 amountInTokens={amountInTokens}
             />
-            <div className="flex justify-center mt-2">
-                <button onClick={handleSendTokens} disabled={isLoading} className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2">
-                    {isLoading && (
-                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                        </svg>
-                    )}
-                    {isLoading ? "Processing..." : "Send Tokens"}
-                </button>
-            </div>
+            <SendButton isLoading={isLoading} onClick={handleSendTokens} />
+            {txResult && (
+                <TxResultModal
+                    success={txResult.success}
+                    error={txResult.error}
+                    onClose={() => setTxResult(null)}
+                />
+            )}
         </div>
     );
 }

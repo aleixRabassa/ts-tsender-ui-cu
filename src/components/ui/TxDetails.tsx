@@ -1,10 +1,10 @@
-interface TransactionDetailsProps {
+interface TxDetailsProps {
     tokenName: string | undefined
     total: number
     amountInTokens: string | null
 }
 
-export default function TransactionDetails({ tokenName, total, amountInTokens }: TransactionDetailsProps) {
+export default function TxDetails({ tokenName, total, amountInTokens }: TxDetailsProps) {
     return (
         <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4 text-sm flex flex-col gap-2">
             <h3 className="font-semibold text-base mb-1">Transaction Details</h3>
