@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-  ],
+, "test/playwright/basic.spec.ts__"  ],
   "exclude": ["node_modules"]
 }

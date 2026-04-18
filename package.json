@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",
+    "e2e:setup": "synpress --headless",
     "e2e": "playwright test"
   },
   "dependencies": {
